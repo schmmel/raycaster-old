@@ -9,11 +9,14 @@ window.onresize = () => {
     canvas.height = document.body.clientHeight;
 };
 
-const playerX = 2;
-const playerY = 2;
-const playerAngle = 45;
+// player position
+let playerX = 2;
+let playerY = 2;
+let playerAngle = 45;
+let playerSpeed = 0.5;
+let playerRotationSpeed = 3;
 
-const playerFov = canvas.width / 20;
+const playerFov = canvas.width / 18;
 // const playerFov = 60;
 
 const rayPrecision = 64;
@@ -24,8 +27,8 @@ const map = [
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,2,0,0,0,1],
+    [1,0,0,0,2,1,0,0,0,1],
+    [1,0,0,0,1,2,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
@@ -106,3 +109,34 @@ function draw() {
 }
 
 draw();
+
+document.addEventListener("keydown", (e) => {
+    switch (e.key) {
+        // forward
+        case "w":
+        case "ArrowUp":
+            let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
+            let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
+            playerX += playerCos;
+            playerY += playerSin;
+            break;
+        // back
+        case "s":
+        case "ArrowDown":
+            let playerCos2 = Math.cos(degToRad(playerAngle)) * playerSpeed;
+            let playerSin2 = Math.sin(degToRad(playerAngle)) * playerSpeed;
+            playerX -= playerCos2;
+            playerY -= playerSin2;
+            break;
+        // rotate left
+        case "a":
+        case "ArrowLeft":
+            playerAngle -= playerRotationSpeed;
+            break;
+        // rotate right
+        case "d":
+        case "ArrowRight":
+            playerAngle += playerRotationSpeed;
+            break;
+    }
+});
