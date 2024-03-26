@@ -27,8 +27,8 @@ const map = [
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,2,1,0,0,0,1],
-    [1,0,0,0,1,2,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,2,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1],
@@ -81,6 +81,9 @@ function raycast() {
 
         // that one theory from that one guy
         let distance = Math.sqrt(Math.pow(playerX - rayX, 2) + Math.pow(playerY - rayY, 2));
+
+        // fish-eye correction
+        distance = distance * Math.cos(degToRad(angle - playerAngle));
 
         let wallHeight = Math.floor((canvas.height / 2) / distance);
         
