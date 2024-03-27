@@ -23,16 +23,17 @@ const rayIncrement = playerFov / canvas.width;
 
 // 1 = cyan wall, 2 = red wall
 const map = [
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,2,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1]
+    [1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,2,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1]
 ];
 
 const roofColor = "blueviolet";
@@ -60,6 +61,7 @@ function raycast() {
         let rayY = playerY;
 
         // they told me i'd never use trigonometry in real life
+        // calculate the angle of the ray
         let rayCos = Math.cos(degToRad(angle)) / rayPrecision;
         let raySin = Math.sin(degToRad(angle)) / rayPrecision;
 
