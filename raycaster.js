@@ -17,11 +17,11 @@ let playerSpeed = 0.5;
 let playerRotationSpeed = 3;
 
 const playerFov = canvas.width / 18;
-// const playerFov = 60;
 
 const rayPrecision = 64;
 const rayIncrement = playerFov / canvas.width;
 
+// 1 = cyan wall, 2 = red wall
 const map = [
     [1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,1],
@@ -35,6 +35,8 @@ const map = [
     [1,1,1,1,1,1,1,1,1,1]
 ];
 
+const roofColor = "blueviolet";
+const floorColor = "darkblue";
 
 function degToRad(deg) {
     return deg * Math.PI / 180;
@@ -61,15 +63,17 @@ function raycast() {
         let rayCos = Math.cos(degToRad(angle)) / rayPrecision;
         let raySin = Math.sin(degToRad(angle)) / rayPrecision;
 
+        // ray keeps going until it hits a wall
         let wall = 0;
         while (wall === 0) {
             rayX += rayCos;
             rayY += raySin;
 
+            // wall = the location of the ray in the map array, if it's not 0 it's a wall
             wall = map[Math.floor(rayY)][Math.floor(rayX)];
-
         };
 
+        // wall colors
         switch (wall) {
             case 1:
                 wallColor = "cyan";
@@ -85,11 +89,12 @@ function raycast() {
         // fish-eye correction
         distance = distance * Math.cos(degToRad(angle - playerAngle));
 
+        // the further the wall the shorter it is
         let wallHeight = Math.floor((canvas.height / 2) / distance);
         
-        drawLine(i, 0, i, (canvas.height / 2) - wallHeight, "blueviolet");
+        drawLine(i, 0, i, (canvas.height / 2) - wallHeight, roofColor);
         drawLine(i, (canvas.height / 2) - wallHeight, i, (canvas.height / 2) + wallHeight, wallColor);
-        drawLine(i, (canvas.height / 2) + wallHeight, i, canvas.height, "darkblue")
+        drawLine(i, (canvas.height / 2) + wallHeight, i, canvas.height, floorColor)
 
 
         angle += rayIncrement;
