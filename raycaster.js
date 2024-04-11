@@ -13,13 +13,21 @@ window.onresize = () => {
 let playerX = 2;
 let playerY = 2;
 let playerAngle = 45;
-let playerSpeed = 0.5;
+let playerSpeed = 0.15;
 let playerRotationSpeed = 3;
 
 const playerFov = canvas.width / 18;
 
+const screenScale = 1;
+
+let projectionWidth = canvas.width / screenScale;
+let projectionHeight = canvas.height / screenScale;
+
 const rayPrecision = 64;
-const rayIncrement = playerFov / canvas.width;
+const rayIncrement = playerFov / projectionWidth;
+
+ctx.scale(screenScale, screenScale);
+ctx.translate(0.5, 0.5);
 
 // 1 = cyan wall, 2 = red wall
 const map = [
@@ -51,10 +59,24 @@ function drawLine(x1, y1, x2, y2, color) {
     ctx.stroke();
 }
 
+function drawTexture(x, wallHeight, texturePosX, texture, textureColors) {
+    let yIncrement = (wallHeight * 2 )/ texture.height;
+    let y = (projectionHeight / 2) - wallHeight;
+
+    for (let i = 0; i < texture.height; i++) {
+        ctx.strokeStyle = textureColors[texture.bitmap[i][texturePosX]];
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + yIncrement + 0.5);
+        ctx.stroke();
+        y += yIncrement;
+    }
+}
+
 function raycast() {
     let angle = playerAngle - playerFov / 2;
 
-    for (let i = 0; i < canvas.width; i++) {
+    for (let i = 0; i < projectionWidth; i++) {
         
         // rays start at player position
         let rayX = playerX;
@@ -75,16 +97,6 @@ function raycast() {
             wall = map[Math.floor(rayY)][Math.floor(rayX)];
         };
 
-        // wall colors
-        switch (wall) {
-            case 1:
-                wallColor = "cyan";
-                break;
-            case 2:
-                wallColor = "red";
-                break;
-        }
-
         // that one theory from that one guy
         let distance = Math.sqrt(Math.pow(playerX - rayX, 2) + Math.pow(playerY - rayY, 2));
 
@@ -92,11 +104,25 @@ function raycast() {
         distance = distance * Math.cos(degToRad(angle - playerAngle));
 
         // the further the wall the shorter it is
-        let wallHeight = Math.floor((canvas.height / 2) / distance);
+        let wallHeight = Math.floor((projectionHeight / 2) / distance);
+
+        // wall color and texture
+        switch (wall) {
+            case 1:
+                texture = textures[0];
+                textureColors = ["cyan", "red"];
+                break;
+            case 2:
+                texture = textures[0];
+                textureColors = ["red", "cyan"];
+                break;  
+        }
+
+        let texturePosX = Math.floor((texture.width * (rayX + rayY)) % texture.width);
         
-        drawLine(i, 0, i, (canvas.height / 2) - wallHeight, roofColor);
-        drawLine(i, (canvas.height / 2) - wallHeight, i, (canvas.height / 2) + wallHeight, wallColor);
-        drawLine(i, (canvas.height / 2) + wallHeight, i, canvas.height, floorColor)
+        drawLine(i, 0, i, (projectionHeight / 2) - wallHeight, roofColor);
+        drawTexture(i, wallHeight, texturePosX, texture, textureColors);
+        drawLine(i, (projectionHeight / 2) + wallHeight, i, projectionHeight, floorColor)
 
 
         angle += rayIncrement;
@@ -106,8 +132,11 @@ function raycast() {
 function draw() {
     setInterval(() => {
         // clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, projectionWidth, projectionWidth);
 
+        // move player
+        movePlayer();
+        
         // do the magic
         raycast();
 
@@ -120,33 +149,49 @@ function draw() {
 
 draw();
 
+// player movement
+let keys = {};
+
 document.addEventListener("keydown", (e) => {
-    switch (e.key) {
-        // forward
-        case "w":
-        case "ArrowUp":
-            let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
-            let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
-            playerX += playerCos;
-            playerY += playerSin;
-            break;
-        // back
-        case "s":
-        case "ArrowDown":
-            let playerCos2 = Math.cos(degToRad(playerAngle)) * playerSpeed;
-            let playerSin2 = Math.sin(degToRad(playerAngle)) * playerSpeed;
-            playerX -= playerCos2;
-            playerY -= playerSin2;
-            break;
-        // rotate left
-        case "a":
-        case "ArrowLeft":
-            playerAngle -= playerRotationSpeed;
-            break;
-        // rotate right
-        case "d":
-        case "ArrowRight":
-            playerAngle += playerRotationSpeed;
-            break;
-    }
+    keys[e.key] = true;
 });
+
+document.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+});
+
+function movePlayer() {
+    if (keys["w"] || keys["ArrowUp"]) {
+        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
+        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
+        let newPlayerX = playerX + playerCos;
+        let newPlayerY = playerY + playerSin;
+
+        if (map[Math.round(newPlayerY)][Math.floor(newPlayerX)] === 0) {
+            playerX = newPlayerX;
+            playerY = newPlayerY;
+        }
+    }
+
+    if (keys["s"] || keys["ArrowDown"]) {
+        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
+        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
+        let newPlayerX = playerX - playerCos;
+        let newPlayerY = playerY - playerSin;
+
+        if (map[Math.floor(newPlayerY)][Math.floor(newPlayerX)] === 0) {
+            playerX = newPlayerX;
+            playerY = newPlayerY;
+        }
+    }
+
+    if (keys["a"] || keys["ArrowLeft"]) {
+        playerAngle -= playerRotationSpeed;
+        playerAngle %= 360;
+    }
+
+    if (keys["d"] || keys["ArrowRight"]) {
+        playerAngle += playerRotationSpeed;
+        playerAngle %= 360;
+    }
+}
