@@ -13,8 +13,10 @@ window.onresize = () => {
 let playerX = 2;
 let playerY = 2;
 let playerAngle = 45;
+// player stats
 let playerSpeed = 0.15;
 let playerRotationSpeed = 3;
+let playerRadius = 10;
 
 const playerFov = canvas.width / 18;
 
@@ -129,6 +131,72 @@ function raycast() {
     }
 };
 
+// player movement
+let keys = {};
+
+document.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+});
+
+document.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+});
+
+function movePlayer() {
+    // up
+    if (keys["w"] || keys["ArrowUp"]) {
+        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
+        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
+        let newPlayerX = playerX + playerCos;
+        let newPlayerY = playerY + playerSin;
+
+        // collision detection
+        let collisionCheckY = Math.floor(newPlayerY + playerCos * playerRadius);
+        let collisionCheckX = Math.floor(newPlayerX + playerSin * playerRadius);
+
+        if (map[collisionCheckY][Math.floor(playerX)] === 0) {
+            playerY = newPlayerY;
+        }
+
+        if (map[Math.floor(playerY)][collisionCheckX] === 0) {
+            playerX = newPlayerX;
+        }
+    }
+
+    // down
+    if (keys["s"] || keys["ArrowDown"]) {
+        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
+        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
+        let newPlayerX = playerX - playerCos;
+        let newPlayerY = playerY - playerSin;
+
+        // collision detection
+        let collisionCheckY = Math.floor(newPlayerY - playerCos * playerRadius);
+        let collisionCheckX = Math.floor(newPlayerX - playerSin * playerRadius);
+
+        if (map[collisionCheckY][Math.floor(playerX)] === 0) {
+            playerY = newPlayerY;
+        }
+
+        if (map[Math.floor(playerY)][collisionCheckX] === 0) {
+            playerX = newPlayerX;
+        }
+    }
+
+    // left
+    if (keys["a"] || keys["ArrowLeft"]) {
+        playerAngle -= playerRotationSpeed;
+        playerAngle %= 360;
+    }
+
+    // right
+    if (keys["d"] || keys["ArrowRight"]) {
+        playerAngle += playerRotationSpeed;
+        playerAngle %= 360;
+    }
+}
+
+
 function draw() {
     setInterval(() => {
         // clear canvas
@@ -148,50 +216,3 @@ function draw() {
 }
 
 draw();
-
-// player movement
-let keys = {};
-
-document.addEventListener("keydown", (e) => {
-    keys[e.key] = true;
-});
-
-document.addEventListener("keyup", (e) => {
-    keys[e.key] = false;
-});
-
-function movePlayer() {
-    if (keys["w"] || keys["ArrowUp"]) {
-        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
-        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
-        let newPlayerX = playerX + playerCos;
-        let newPlayerY = playerY + playerSin;
-
-        if (map[Math.round(newPlayerY)][Math.floor(newPlayerX)] === 0) {
-            playerX = newPlayerX;
-            playerY = newPlayerY;
-        }
-    }
-
-    if (keys["s"] || keys["ArrowDown"]) {
-        let playerCos = Math.cos(degToRad(playerAngle)) * playerSpeed;
-        let playerSin = Math.sin(degToRad(playerAngle)) * playerSpeed;
-        let newPlayerX = playerX - playerCos;
-        let newPlayerY = playerY - playerSin;
-
-        if (map[Math.floor(newPlayerY)][Math.floor(newPlayerX)] === 0) {
-            playerX = newPlayerX;
-            playerY = newPlayerY;
-        }
-    }
-
-    if (keys["a"] || keys["ArrowLeft"]) {
-        playerAngle -= playerRotationSpeed;
-        playerAngle %= 360;
-    }
-
-    if (keys["d"] || keys["ArrowRight"]) {
-        playerAngle += playerRotationSpeed;
-        playerAngle %= 360;
-    }
-}
